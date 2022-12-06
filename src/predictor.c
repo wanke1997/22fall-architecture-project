@@ -136,8 +136,8 @@ void init_tournament() {
 
 void init_custom() {
   lhistoryBits = 13;
-  ghistoryBits = 11;
-  pcIndexBits = 12;
+  ghistoryBits = 14;
+  pcIndexBits = 14;
   gHistory = 0;
   customLocalMask = get_mask(lhistoryBits);
   customGlobalMask = get_mask(ghistoryBits);
