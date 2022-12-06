@@ -33,6 +33,7 @@ int verbose;
 //      Predictor Data Structures     //
 //------------------------------------//
 
+// public data structure
 uint32_t gHistory;
 
 // 1. gShare data structure
@@ -40,6 +41,23 @@ uint32_t gshareMask;
 uint32_t * gshareTable;
 
 // 2. Tournament data structure
+uint32_t tourGlobalMask;
+uint32_t tourLocalMask;
+uint32_t tourPcMask;
+
+uint32_t * tourGlobalPht;
+uint32_t * tourLocalPht;
+uint32_t * tourLocalHt;
+uint32_t * tourChoicePht;
+
+/*
+choosing predictor:
+  1: strongly choose local
+  2: weakly choose local predictor
+  3: weakly choose global predictor
+  4: strongly choose global predictor
+*/
+
 
 // 3. custom data structure
 
@@ -71,6 +89,43 @@ void init_gshare() {
   return;
 }
 
+void init_tournament() {
+  gHistory = 0;
+  tourLocalMask = get_mask(lhistoryBits);
+  tourGlobalMask = get_mask(ghistoryBits);
+  tourPcMask = get_mask(pcIndexBits);
+
+  // init local predictor
+  int localPhtSize = (1<<lhistoryBits);
+  tourLocalPht = (uint32_t *)malloc(localPhtSize*sizeof(uint32_t));
+  for(int i=0;i<localPhtSize;i++) {
+    tourLocalPht[i] = WN;
+  }
+
+  // init global predictor
+  int globalPhtSize = (1<<ghistoryBits);
+  tourGlobalPht = (uint32_t *)malloc(globalPhtSize*sizeof(uint32_t));
+  for(int i=0;i<globalPhtSize;i++) {
+    tourGlobalPht[i] = WN;
+  }
+
+  // init choice predictor
+  int choicePhtSize = (1<<ghistoryBits);
+  tourChoicePht = (uint32_t *)malloc(choicePhtSize*sizeof(uint32_t));
+  for(int i=0;i<choicePhtSize;i++) {
+    tourChoicePht[i] = 2;
+  }//initially weakly choose global predictor
+
+  //init local history table
+  int localHtSize = (1<<pcIndexBits);
+  tourLocalHt = (uint32_t *)malloc(localHtSize*sizeof(uint32_t));
+  for(int i=0;i<localHtSize;i++) {
+    tourLocalHt[i] = 0;
+  }
+
+  return;
+}
+
 // Initialize the predictor
 //
 void
@@ -83,6 +138,8 @@ init_predictor()
       init_gshare();
       break;
     case TOURNAMENT:
+      init_tournament();
+      break;
     case CUSTOM:
     default:
       break;
@@ -108,14 +165,37 @@ uint8_t gshare_predict(uint32_t pc) {
   }
 }
 
+uint8_t tournament_predict(uint32_t pc) {
+  uint32_t globalIdx = (gHistory&tourGlobalMask);
+  uint32_t choice = tourChoicePht[globalIdx];
+  
+  // choose the local predictor
+  if(choice<2) {
+    uint32_t pcLower = (pc&tourPcMask);
+    uint32_t localIdx = (tourLocalHt[pcLower]&tourLocalMask);
+    uint32_t localPredict = tourLocalPht[localIdx];
+    if(localPredict<2) {
+      return NOTTAKEN;
+    } else {
+      return TAKEN;
+    }
+  }
+
+  // choose the global predictor 
+  else {
+    uint32_t globalPredict = tourGlobalPht[globalIdx];
+    if(globalPredict<2) {
+      return NOTTAKEN;
+    } else {
+      return TAKEN;
+    }
+  }
+}
+
 
 uint8_t
 make_prediction(uint32_t pc)
 {
-  //
-  //TODO: Implement prediction scheme
-  //
-
   // Make a prediction based on the bpType
   switch (bpType) {
     case STATIC:
@@ -139,11 +219,11 @@ make_prediction(uint32_t pc)
 
 // some helper functions
 void train_gshare(uint32_t pc, uint8_t outcome) {
-  // update prediction table
+  //1. update prediction table
   uint32_t pcLower = (pc&gshareMask);
   uint32_t gHistoryLower = (gHistory&gshareMask);
   uint32_t idx = (pcLower^gHistoryLower);
-  uint32_t prediction = gshare_predict(pc);
+  // uint32_t prediction = gshare_predict(pc);
   if(outcome == TAKEN) {
     if(gshareTable[idx]<3) {
       gshareTable[idx]++;
@@ -154,9 +234,83 @@ void train_gshare(uint32_t pc, uint8_t outcome) {
     }
   }
 
-  // update history
+  //2. update history
   gHistory = ((gHistory<<1) | outcome);
   gHistory = (gHistory&gshareMask);
+
+  return;
+}
+
+void train_tourament(uint32_t pc, uint8_t outcome) {
+  uint32_t pcLower = (pc&tourPcMask);
+  uint32_t localIdx = (tourLocalHt[pcLower]&tourLocalMask);
+  uint32_t globalIdx = (gHistory&tourGlobalMask);
+
+  // 1. prediction with local predictor and global predictor
+  uint32_t localPredict = tourLocalPht[localIdx];
+  if(localPredict<2) {
+    localPredict = NOTTAKEN;
+  } else {
+    localPredict = TAKEN;
+  }
+
+  uint32_t globalPredict = tourGlobalPht[globalIdx];
+  if(globalPredict<2) {
+    globalPredict = NOTTAKEN;
+  } else {
+    globalPredict = TAKEN;
+  }
+
+  uint32_t choice = tourChoicePht[globalIdx];
+
+  // 2. update choice table based on the outcome
+  if(outcome==TAKEN) {
+    if(localPredict==NOTTAKEN && globalPredict==TAKEN) {
+      if(choice<3) {
+        tourChoicePht[globalIdx]++;
+      }
+    } else if(localPredict==TAKEN && globalPredict==NOTTAKEN) {
+      if(choice>0) {
+        tourChoicePht[globalIdx]--;
+      }
+    }
+  } else {
+    if(localPredict==NOTTAKEN && globalPredict==TAKEN) {
+      if(choice>0) {
+        tourChoicePht[globalIdx]--;
+      }
+    } else if(localPredict==TAKEN && globalPredict==NOTTAKEN) {
+      if(choice<3) {
+        tourChoicePht[globalIdx]++;
+      }
+    }
+  }
+
+  // 3. update local predictor and global predictor
+  if(outcome==TAKEN) {
+    if(tourLocalPht[localIdx]<3) {
+      tourLocalPht[localIdx]++;
+    }
+
+    if(tourGlobalPht[globalIdx]<3) {
+      tourGlobalPht[globalIdx]++;
+    }
+  } else {
+    if(tourLocalPht[localIdx]>0) {
+      tourLocalPht[localIdx]--;
+    }
+
+    if(tourGlobalPht[globalIdx]>0) {
+      tourGlobalPht[globalIdx]--;
+    }
+  }
+
+  // 4. update gHistory and local history
+  gHistory = (gHistory<<1) | outcome;
+  gHistory = (gHistory&tourGlobalMask);
+
+  tourLocalHt[pcLower] = (tourLocalHt[pcLower]<<1) | outcome;
+  tourLocalHt[pcLower] = (tourLocalHt[pcLower]&tourLocalMask);
 
   return;
 }
@@ -164,9 +318,6 @@ void train_gshare(uint32_t pc, uint8_t outcome) {
 void
 train_predictor(uint32_t pc, uint8_t outcome)
 {
-  //
-  //TODO: Implement Predictor training
-  //
   switch (bpType) {
     case STATIC:
       break;
@@ -174,6 +325,8 @@ train_predictor(uint32_t pc, uint8_t outcome)
       train_gshare(pc, outcome);
       break;
     case TOURNAMENT:
+      train_tourament(pc, outcome);
+      break;
     case CUSTOM:
     default:
       break;
