@@ -58,14 +58,11 @@ choosing predictor:
 
 
 // 3. custom data structure
-uint32_t customGlobalMask;
-uint32_t customLocalMask;
+int customPcBits;
+int customGlobalBits;
+short int ** weights;
+uint8_t * customGlobalHistory;
 uint32_t customPcMask;
-
-uint32_t * customGlobalPht;
-uint32_t * customLocalPht;
-uint32_t * customLocalHt;
-uint32_t * customChoicePht;
 
 
 //------------------------------------//
@@ -133,44 +130,26 @@ void init_tournament() {
 }
 
 void init_custom() {
-  lhistoryBits = 13;
-  ghistoryBits = 14;
-  pcIndexBits = 14;
-  gHistory = 0;
-  customLocalMask = get_mask(lhistoryBits);
-  customGlobalMask = get_mask(ghistoryBits);
-  customPcMask = get_mask(pcIndexBits);
+  // TODO: preceptron
+  customPcBits = 9;
+  customGlobalBits = 15;
 
-  // init local predictor
-  int localPhtSize = (1<<lhistoryBits);
-  customLocalPht = (uint32_t *)malloc(localPhtSize*sizeof(uint32_t));
-  for(int i=0;i<localPhtSize;i++) {
-    customLocalPht[i] = WN;
+  int N = (1<<customPcBits);
+  weights = (short int **)malloc(N*sizeof(short int *));
+  int n = customGlobalBits;
+  for(int i=0;i<N;i++) {
+    weights[i] = (short int *)malloc((n+1)*sizeof(short int));
   }
 
-  // init global predictor
-  int globalPhtSize = (1<<ghistoryBits);
-  customGlobalPht = (uint32_t *)malloc(globalPhtSize*sizeof(uint32_t));
-  for(int i=0;i<globalPhtSize;i++) {
-    customGlobalPht[i] = WN;
+  for(int i=0;i<N;i++) {
+    for(int j=0;j<n;j++) {
+      weights[i][j] = 0;
+    }
+    weights[i][n] = 1;
   }
 
-  // init choice predictor
-  int choicePhtSize = (1<<ghistoryBits);
-  customChoicePht = (uint32_t *)malloc(choicePhtSize*sizeof(uint32_t));
-  for(int i=0;i<choicePhtSize;i++) {
-    customChoicePht[i] = 3;
-  }//initially weakly choose global predictor
-
-  //init local history table
-  int localHtSize = (1<<pcIndexBits);
-  customLocalHt = (uint32_t *)malloc(localHtSize*sizeof(uint32_t));
-  for(int i=0;i<localHtSize;i++) {
-    customLocalHt[i] = 0;
-  }
-
-  return;
-
+  customGlobalHistory = (uint8_t *)malloc(n*sizeof(uint8_t));
+  customPcMask = get_mask(customPcBits);
 }
 
 // Initialize the predictor
@@ -242,32 +221,19 @@ uint8_t tournament_predict(uint32_t pc) {
 }
 
 uint8_t custom_predict(uint32_t pc) {
-  uint32_t pcLower = (pc&customGlobalMask);
-  uint32_t globalLower = (gHistory&customGlobalMask);
-  uint32_t globalIdx = (pcLower^globalLower);
-  uint32_t choice = customChoicePht[globalIdx];
-  
-  // choose the local predictor
-  if(choice<4) {
-    uint32_t pcLower = (pc&customPcMask);
-    uint32_t localIdx = (customLocalHt[pcLower]&customLocalMask);
-    uint32_t localPredict = customLocalPht[localIdx];
-    if(localPredict<2) {
-      return NOTTAKEN;
-    } else {
-      return TAKEN;
-    }
+  // TODO: perceptron
+  uint32_t pcLower = (pc&customPcMask);
+  short int * weight = weights[pcLower];
+  int n = customGlobalBits;
+  int y = 0;
+  for(int i=0;i<n;i++) {
+    int history = (customGlobalHistory[i]>0) ? 1 : -1;
+    y += history*weight[i];
   }
+  y += 1*weight[n];
 
-  // choose the gShare predictor to predict globally
-  else {
-    uint32_t globalPredict = customGlobalPht[globalIdx];
-    if(globalPredict<2) {
-      return NOTTAKEN;
-    } else {
-      return TAKEN;
-    }
-  }
+  if(y>=0) return TAKEN;
+  else return NOTTAKEN;
 }
 
 
@@ -395,77 +361,72 @@ void train_tourament(uint32_t pc, uint8_t outcome) {
 }
 
 void train_custom(uint32_t pc, uint8_t outcome) {
+  // TODO: perceptron
+  uint32_t theta = 1.93*customGlobalBits + 14;
   uint32_t pcLower = (pc&customPcMask);
-  uint32_t localIdx = (customLocalHt[pcLower]&customLocalMask);
+  short int * weight = weights[pcLower];
+  int ySign = 0;
+  int tSign = 0;
 
-  uint32_t globalLower = (gHistory&customGlobalMask);
-  uint32_t globalIdx = (pcLower^globalLower);
+  int y = 0;
+  int n = customGlobalBits;
+  for(int i=0;i<n;i++) {
+    int history = (customGlobalHistory[i]>0 ? 1 : -1);
+    y += history*weight[i];
+  }
+  y += 1*weight[n];
 
-  // 1. prediction with local predictor and gShare global predictor
-  uint32_t localPredict = customLocalPht[localIdx];
-  if(localPredict<2) {
-    localPredict = NOTTAKEN;
+  if(y>=0) {
+    ySign = 1;
   } else {
-    localPredict = TAKEN;
+    ySign = -1;
   }
 
-  uint32_t globalPredict = customGlobalPht[globalIdx];
-  if(globalPredict<2) {
-    globalPredict = NOTTAKEN;
-  } else {
-    globalPredict = TAKEN;
-  }
-
-  uint32_t choice = customChoicePht[globalIdx];
-
-  // 2. update choice table based on the outcome
   if(outcome==TAKEN) {
-    if(localPredict==NOTTAKEN && globalPredict==TAKEN) {
-      if(choice<7) {
-        customChoicePht[globalIdx]++;
-      }
-    } else if(localPredict==TAKEN && globalPredict==NOTTAKEN) {
-      if(choice>0) {
-        customChoicePht[globalIdx]--;
-      }
-    }
+    tSign = 1;
   } else {
-    if(localPredict==NOTTAKEN && globalPredict==TAKEN) {
-      if(choice>0) {
-        customChoicePht[globalIdx]--;
-      }
-    } else if(localPredict==TAKEN && globalPredict==NOTTAKEN) {
-      if(choice<7) {
-        customChoicePht[globalIdx]++;
+    tSign = -1;
+  }
+
+  if((ySign!=tSign) || abs(y)<=theta) {
+    for(int i=0;i<n;i++) {
+      if(tSign>0) {
+        if(customGlobalHistory[i]>0) {
+          if(weight[i] < 127) {
+            weight[i] += 1;
+          } else {
+            weight[i] = 127;
+          }
+        } else {
+          if(weight[i] > -128) {
+            weight[i] -= 1;
+          } else {
+            weight[i] = -128;
+          }
+        }
+      } else {
+        if(customGlobalHistory[i]>0) {
+          if(weight[i] > -128) {
+            weight[i] -= 1;
+          } else {
+            weight[i] = -128;
+          }
+        } else {
+          if(weight[i]<127) {
+            weight[i] += 1;
+          } else {
+            weight[i] = 127;
+          }
+        }
+
       }
     }
   }
 
-  // 3. update local predictor and global predictor
-  if(outcome==TAKEN) {
-    if(customLocalPht[localIdx]<3) {
-      customLocalPht[localIdx]++;
-    }
-
-    if(customGlobalPht[globalIdx]<3) {
-      customGlobalPht[globalIdx]++;
-    }
-  } else {
-    if(customLocalPht[localIdx]>0) {
-      customLocalPht[localIdx]--;
-    }
-
-    if(customGlobalPht[globalIdx]>0) {
-      customGlobalPht[globalIdx]--;
-    }
+  for(int i=0;i<n-1;i++) {
+    customGlobalHistory[i] = customGlobalHistory[i+1];
   }
-
-  // 4. update gHistory and local history
-  gHistory = (gHistory<<1) | outcome;
-  gHistory = (gHistory&customGlobalMask);
-
-  customLocalHt[pcLower] = (customLocalHt[pcLower]<<1) | outcome;
-  customLocalHt[pcLower] = (customLocalHt[pcLower]&customLocalMask);
+  customGlobalHistory[n-1] = outcome;
 
   return;
 }
