@@ -131,8 +131,9 @@ void init_tournament() {
 
 void init_custom() {
   // TODO: preceptron
+  gHistory = 0;
   customPcBits = 9;
-  customGlobalBits = 15;
+  customGlobalBits = 16;
 
   int N = (1<<customPcBits);
   weights = (short int **)malloc(N*sizeof(short int *));
@@ -223,6 +224,8 @@ uint8_t tournament_predict(uint32_t pc) {
 uint8_t custom_predict(uint32_t pc) {
   // TODO: perceptron
   uint32_t pcLower = (pc&customPcMask);
+  // uint32_t gLower = (gHistory&customPcMask);
+  // uint32_t idx = (pcLower^gLower);
   short int * weight = weights[pcLower];
   int n = customGlobalBits;
   int y = 0;
@@ -232,7 +235,7 @@ uint8_t custom_predict(uint32_t pc) {
   }
   y += 1*weight[n];
 
-  if(y>=0) return TAKEN;
+  if(y>1) return TAKEN;
   else return NOTTAKEN;
 }
 
@@ -362,8 +365,10 @@ void train_tourament(uint32_t pc, uint8_t outcome) {
 
 void train_custom(uint32_t pc, uint8_t outcome) {
   // TODO: perceptron
-  uint32_t theta = 1.93*customGlobalBits + 14;
+  uint32_t theta = 1.96*customGlobalBits + 14;
   uint32_t pcLower = (pc&customPcMask);
+  // uint32_t gLower = (gHistory&customPcMask);
+  // uint32_t idx = (pcLower^gLower);
   short int * weight = weights[pcLower];
   int ySign = 0;
   int tSign = 0;
