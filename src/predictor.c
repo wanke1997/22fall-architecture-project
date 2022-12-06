@@ -8,12 +8,10 @@
 #include <stdio.h>
 #include "predictor.h"
 
-//
-// TODO:Student Information
-//
-const char *studentName = "NAME";
-const char *studentID   = "PID";
-const char *email       = "EMAIL";
+
+const char *studentName = "Ke Wan & Xi Cai";
+const char *studentID   = "A59001992 & A59011112";
+const char *email       = "kewan@ucsd.edu & x9cai@ucsd.edu";
 
 //------------------------------------//
 //      Predictor Configuration       //
@@ -305,7 +303,6 @@ void train_gshare(uint32_t pc, uint8_t outcome) {
   uint32_t pcLower = (pc&gshareMask);
   uint32_t gHistoryLower = (gHistory&gshareMask);
   uint32_t idx = (pcLower^gHistoryLower);
-  // uint32_t prediction = gshare_predict(pc);
   if(outcome == TAKEN) {
     if(gshareTable[idx]<3) {
       gshareTable[idx]++;
