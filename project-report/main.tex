@@ -115,7 +115,8 @@ we get the lowest 13-bit PC and global history table to make hash calculation in
 As Figure 1 indicated, we get the lowest 13-bit PC and global history table and make a XOR calculation. The result is the index for prediction table.
 The finite-state machine for prediction result is also contained in Figure 1. G-Share branch predictor employs 2-bit 
 history-based branch prediction. The values in prediction table are 2-bit unsigned integers, 
-where 0 is strongly not taken(SN), 1 is weakly not taken(WN), 2 is weakly taken(WT), and 3 is strongly taken(ST). We can pick the preduction result from this table.  
+where 0 is strongly not taken(SN), 1 is weakly not taken(WN), 2 is weakly taken(WT), and 3 is strongly taken(ST). We can pick the preduction result from this table. 
+Take this entry for example, the value of this preduction is WT, which means that the predictor will predict Weakly Taken for this PC.  
 \subsection{Tournament branch predictor}
 Tournament branch predictor is a hybrid predictor. Why is it called "hybrid"? Because it contains two branch predictor. One is global branch predictor, and the other one is local branch predictor. 
 The architecture of Tournament branch predictor is shown in Figure 2. 
@@ -138,7 +139,7 @@ The values in the global prediction table are 2-bit prediction results, which ha
 Our custom Preceptron branch predictor employs the idea from Dynamic Branch Prediction with Perceptrons paper~\cite{nicepaper4}, which is a micro neural network architecture. The architecture of this branch predictor is shown in Figure 3.
 There are two storage structures in this branch predictor. \textbf{The first one is Perceptron Table, which contains weights for different branches. Since we get the lowest 9 bits from PC, there will be 512 entries for Perceptron Table. 
 Every group of Perceptron contains 16 weights including a biased variable. Every weight is a 8-bit integer , ranging from -128 to 127. Therefore, the size of Perceptron Table is $512*16*8 = 64k  bits$, which satisfies the project requirement. 
-Additionally, the custom Perception contains a global history table, which consists of fifteen 8-bit integers to record the latest 15 outcomes. The size of global history table is $15*8 = 120  bits$, which also 
+The second one is global history table, which consists of fifteen 8-bit integers to record the latest 15 outcomes. The size of global history table is $15*8 = 120  bits$, which also 
 satisfies the project requirement.}
 \includegraphics[width=\linewidth]{perceptron.png}
 \begin{center}
