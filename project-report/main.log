@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.29)  6 DEC 2022 23:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.29)  7 DEC 2022 12:04
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -295,53 +295,79 @@ Package grfext Info: Graphics extension search list:
  (/usr/local/texlive/2022/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-LaTeX Font Info:    Trying to load font information for U+msa on input line 81.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 77.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 81.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 77.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1{/usr/local/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
-<g-share.png, id=14, 452.69125pt x 222.8325pt>
+<g-share.png, id=14, 701.62125pt x 380.42125pt>
 File: g-share.png Graphic file (type png)
 <use g-share.png>
-Package pdftex.def Info: g-share.png  used on input line 110.
-(pdftex.def)             Requested size: 252.0pt x 124.04411pt.
-<Tournament.png, id=16, 551.05875pt x 336.25626pt>
+Package pdftex.def Info: g-share.png  used on input line 112.
+(pdftex.def)             Requested size: 252.0pt x 136.63228pt.
+<Tournament.png, id=16, 852.18375pt x 556.0775pt>
 File: Tournament.png Graphic file (type png)
 <use Tournament.png>
-Package pdftex.def Info: Tournament.png  used on input line 123.
-(pdftex.def)             Requested size: 252.0pt x 153.77159pt.
+Package pdftex.def Info: Tournament.png  used on input line 133.
+(pdftex.def)             Requested size: 252.0pt x 164.43175pt.
 
-Underfull \hbox (badness 5563) in paragraph at lines 121--124
+Underfull \hbox (badness 5563) in paragraph at lines 131--134
 []\OT1/ptm/m/n/10 Tournament branch pre-dic-tor is a hy-brid pre-dic-tor.
  []
 
 
-Underfull \hbox (badness 4279) in paragraph at lines 121--124
+Underfull \hbox (badness 4279) in paragraph at lines 131--134
 \OT1/ptm/m/n/10 Why is it called "hy-brid"? Be-cause it con-tains two
  []
 
 
-Underfull \hbox (badness 3407) in paragraph at lines 121--124
+Underfull \hbox (badness 3407) in paragraph at lines 131--134
 \OT1/ptm/m/n/10 branch pre-dic-tor. One is global branch pre-dic-tor, and
  []
 
 
-Underfull \hbox (badness 1616) in paragraph at lines 121--124
+Underfull \hbox (badness 1616) in paragraph at lines 131--134
 \OT1/ptm/m/n/10 of Tour-na-ment branch pre-dic-tor is shown in Fig-ure 2.
  []
 
-<perceptron.png, id=17, 405.515pt x 326.21875pt>
+[2 <./g-share.png> <./Tournament.png>]
+<choice-machine.png, id=23, 534.99875pt x 399.4925pt>
+File: choice-machine.png Graphic file (type png)
+<use choice-machine.png>
+Package pdftex.def Info: choice-machine.png  used on input line 156.
+(pdftex.def)             Requested size: 252.0pt x 188.17601pt.
+
+Underfull \hbox (badness 1708) in paragraph at lines 155--157
+\OT1/ptm/m/n/10 tains four steps. The first step is to make pre-dic-tions
+ []
+
+
+Underfull \hbox (badness 2096) in paragraph at lines 155--157
+\OT1/ptm/m/n/10 fol-low-ing the fi-nite state ma-chine shown in Fig-ure 3.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 164--169
+
+ []
+
+<perceptron.png, id=24, 579.16376pt x 515.9275pt>
 File: perceptron.png Graphic file (type png)
 <use perceptron.png>
-Package pdftex.def Info: perceptron.png  used on input line 144.
-(pdftex.def)             Requested size: 252.0pt x 202.72641pt.
-[2 <./g-share.png> <./Tournament.png>] (./main.bbl)
+Package pdftex.def Info: perceptron.png  used on input line 177.
+(pdftex.def)             Requested size: 252.0pt x 224.48175pt.
+
+Overfull \hbox (10.0pt too wide) in paragraph at lines 177--178
+[][] 
+ []
+
+[3 <./choice-machine.png> <./perceptron.png>] (./main.bbl)
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -353,22 +379,20 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[3
-
- <./perceptron.png>] (./main.aux) ) 
+[4] (./main.aux) ) 
 Here is how much of TeX's memory you used:
- 5011 strings out of 478268
- 80707 string characters out of 5846347
- 385027 words of memory out of 5000000
- 23148 multiletter control sequences out of 15000+600000
- 504175 words of font info for 88 fonts, out of 8000000 for 9000
+ 5043 strings out of 478268
+ 81126 string characters out of 5846347
+ 386035 words of memory out of 5000000
+ 23170 multiletter control sequences out of 15000+600000
+ 510106 words of font info for 103 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,11n,67p,395b,251s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 60i,11n,67p,402b,281s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (3 pages, 199825 bytes).
+Output written on main.pdf (4 pages, 402366 bytes).
 PDF statistics:
- 72 PDF objects out of 1000 (max. 8388607)
- 40 compressed objects within 1 object stream
+ 77 PDF objects out of 1000 (max. 8388607)
+ 42 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
