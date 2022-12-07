@@ -21,25 +21,7 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
-\bibitem{lamport94}
-L.~Lamport, \emph{{\LaTeX: A Document Preparation System}}, 2nd~ed.\hskip 1em
-  plus 0.5em minus 0.4em\relax Reading, Massachusetts: Addison-Wesley, 1994.
-
-\bibitem{nicepaper1}
-F.~Lastname1 and F.~Lastname2, ``A very nice paper to cite,'' in
-  \emph{Proceedings of the 49th Annual IEEE/ACM International Symposium on
-  Microarchitecture}, 2016.
-
-\bibitem{nicepaper2}
-F.~Lastname1, F.~Lastname2, and F.~Lastname3, ``Another very nice paper to
-  cite,'' in \emph{Proceedings of the 48th Annual IEEE/ACM International
-  Symposium on Microarchitecture}, 2015.
-
-\bibitem{nicepaper3}
-F.~Lastname1, F.~Lastname2, F.~Lastname3, F.~Lastname4, F.~Lastname5,
-  F.~Lastname6, F.~Lastname7, F.~Lastname8, F.~Lastname9, F.~Lastname10,
-  F.~Lastname11, and F.~Lastname12, ``Yet another very nice paper to cite, with
-  many author names all spelled out,'' in \emph{Proceedings of the 38th Annual
-  International Symposium on Computer Architecture}, 2011.
+\bibitem{nicepaper4}
+C.~L. Daniel A.~Jimenez, ``Dynamic branch prediction with perceptrons,'' 2001.
 
 \end{thebibliography}
