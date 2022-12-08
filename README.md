@@ -1,4 +1,4 @@
-# CSE240A Branch Predictor Project
+# 22fall Architecture Project
 
 ## Table of Contents
   * [Introduction](#introduction)
