@@ -49,7 +49,7 @@ University of California San Diego
 Branch prediction is very important to accelerate the speed of program and reduce stall time. This paper introduces three branch predictors, including G-Share branch predictor, Tournament branch predictor, and custom Perceptron branch predictor. 
 This paper describes the structures of three branch predictors, the prediction and training method details, the implementation details, and experiment environment for developing and testing branch predictors. This paper uses six 
 address traces to test misprediction rate of three branch predictors. The conclusion is that G-Share branch predictor and Tournament branch predictor have the similar performance. And custom Perceptron branch predictor performs 
-the best among three predictors. It consumes the smallest memory space and beats the other two branch predictors in all six address traces. 
+the best among three predictors. It beats the other two branch predictors in all six address traces. 
 
 \end{abstract}
 
@@ -107,15 +107,17 @@ in order to help predict the outcome of a branch. In this paper, we provide thre
 In this section, for every branch predictor, we will describe the prediction and training design ideas. Note that for every prediction method, the input parameter is PC, and the output value is TAKEN or NOT-TAKEN. For 
 training method, the input parameters are PC and outcome. There is no output for training method. 
 \subsection{G-Share branch predictor}
-\begin{center}
-  \textbf{Prediction}
-\end{center}
-
 G-Share branch predictor is one of the most simple but efficient branch predictors, which uses PC and global history table to make predictions. In this project, we use G-Share 13 predictor, which means that 
-we get the lowest 13-bit PC and global history table to make hash calculation in order to get the index for prediction table.
+we get the lowest 13-bit PC and global history table to make hash calculation in order to get the index for prediction table. 
 \includegraphics[width=\linewidth]{g-share.png}
 \begin{center}
   {\small Figure 1. G-Share predictor}
+\end{center}
+
+The architecture of G-Share branch predictor is shown in Figure 1. \textbf{The memory space for G-Share 13 branch predictor is $2^{13}*2+13 = 16.01K bits$}. 
+
+\begin{center}
+  \textbf{Prediction}
 \end{center}
 
 As Figure 1 indicated, we get the lowest 13-bit PC and global history table and make a XOR calculation. The result is the index for prediction table.
@@ -123,6 +125,7 @@ The finite-state machine for prediction result is also contained in Figure 1. G-
 history-based branch prediction. The values in prediction table are 2-bit unsigned integers, 
 where 0 is strongly not taken(SN), 1 is weakly not taken(WN), 2 is weakly taken(WT), and 3 is strongly taken(ST). We can pick the prediction result from this table. 
 Take the entry in Figure 1 for example, the value of this prediction is WT, which means that the predictor will predict Weakly Taken for this PC.
+
 
 \begin{center}
   \textbf{Training}
@@ -132,13 +135,16 @@ For picked value in prediction table, the branch predictor follows the finite-st
 For global history table, the predictor will shift the bits in global history register to left by 1, and put the outcome to the least significant bit of the global history register. 
 
 \subsection{Tournament branch predictor}
-Tournament branch predictor is a hybrid predictor. Why is it called "hybrid"? Because it contains two branch predictor. One is global branch predictor, and the other one is local branch predictor. 
+Tournament branch predictor is a hybrid predictor. Why is it called "hybrid"? Because it contains two branch predictors. One is global branch predictor, and the other one is local branch predictor. 
 The architecture of Tournament branch predictor is shown in Figure 2. 
 \includegraphics[width=\linewidth]{Tournament.png}
 \begin{center}
   {\small Figure 2. Tournament branch predictor}
 \end{center}
+
 In this paper, we use Tournament 9:10:10, which means that we assign 9 bits for global history, 10 bits for local history, and 10 bits for PC. We also referred Alpha 21264 Microprocessor Architecture ~\cite{nicepaper5}.  
+
+\textbf{The memory space for Tournament 9:10:10 branch predictor is $2^{10}*10+2^{10}*2+2^{9}*2+2^{9}*2+9 = 14.00K bits$}.
 
 \begin{center}
   \textbf{Prediction}
@@ -169,10 +175,17 @@ update process is the same as G-Share branch predictor.
 
 \subsection{Custom Perceptron branch predictor}
 Our custom Preceptron branch predictor employs the idea from Dynamic Branch Prediction with Perceptrons paper~\cite{nicepaper4}, which is a micro neural network architecture. The architecture of this branch predictor is shown in Figure 4.
-There are two storage structures in this branch predictor. The first one is Perceptron Table, which contains weights for different branches. Since we get the lowest 9 bits from PC, there will be 512 entries for Perceptron Table. 
-Every Perceptron contains 16 weights including a biased variable. Every weight is a 8-bit integer, ranging from -128 to 127. Therefore, the size of Perceptron Table is $512*16*8 = 64k  bits$, which satisfies the project requirement. 
+\includegraphics[width=\linewidth]{perceptron.png}
+\begin{center}
+  {\small Figure 4. Custom Preceptron branch predictor}
+\end{center}
+
+Now we calculate the memory space of custom Preceptron branch predictor. There are two storage structures in this branch predictor. 
+The first one is Perceptron Table, which contains weights for different branches. Since we get the lowest 9 bits from PC, there will be 512 entries for Perceptron Table. 
+Every Perceptron contains 16 weights including a biased variable. Every weight is a 8-bit integer, ranging from -128 to 127. Therefore, the size of Perceptron Table is $512*16*8 = 64K bits$. 
 The second one is global history table, which consists of fifteen 8-bit integers to record the latest 15 outcomes. The remaining integer is the biased variable, and it doesn't consume memory space. 
-The size of global history table is $15*8 = 120  bits$, which also satisfies the project requirement.
+The size of global history table is $15*8 = 120 bits$. 
+\textbf{The total memory occupation of custom Preceptron branch predictor is $64K + 120 bits$, which satisfies the project requirement.}
 
 \begin{center}
   \textbf{Prediction}
@@ -180,11 +193,6 @@ The size of global history table is $15*8 = 120  bits$, which also satisfies the
 For making a prediction, the first step is to get the lowest 9-bit PC as the index of Perceptron Table. Then the predictor will use this index to get the weights from Perceptron Table and make a inner product between Global History Table and the weights.
 The inner product result is stored in variable Y. Then the predictor will compare the value of Y with zero. If the value of Y is equal to or greater than zero, then the predictor will predict it as Taken. Otherwise, the predictor will predict it as 
 Not Taken.
-
-\includegraphics[width=\linewidth]{perceptron.png}
-\begin{center}
-  {\small Figure 4. Custom Preceptron branch predictor}
-\end{center}
 
 \begin{center}
   \textbf{Training}
@@ -240,20 +248,18 @@ Tournament branch predictor has a lower average misprediction rate than G-Share 
 G-Share branch predictor beats Tournament branch predictor on fp\_1, fp\_2, and int\_2. But Tournament branch predictor beats G-Share branch predictor on int\_1, mm\_1. and mm\_2. 
 
 The best performer among these branch predictor is custom Perceptron branch predictor. It has the lowest misprediction rate. And it beats both G-Share branch predictor and Tournament branch predictor in all
-six address traces. Moreover, it only consumes 64k + 120 bits memory space, but both G-Share branch predictor and Tournament branch predictor consume more than 100k bits memory space. Therefore, we can conclude that our 
-custom Perceptron branch predictor has the best performance. 
+six address traces.
 
 We discussed the reason for this result. For Tournament branch predictor, we observe that the average misprediction rate is lower than G-Share branch predictor. 
 The reason is that Tournament branch predictor has two branch predictors. One is local branch predictor, and the other is global branch predictor. Tournament branch predictor can decide which branch predictor to use 
 based on the input PC and choice history. This is advantageous for the Tournament branch predictor to get a better choice. However, G-Share branch predictor only has one branch predictor. 
-If the address trace relys more on local history than on global history, then the G-Share branch predictor will perform badly and it cannot do better because it doesn't have a local branch predictor. 
+If the address trace relies more on local history than on global history, then the G-Share branch predictor will perform badly and it cannot do better because it doesn't have a local branch predictor. 
 But sometimes, the choice predictor cannot predict which predictor performs better correctly, and sometimes neither of these two predictors can predict correctly. Therefore, for some address traces, the performace of Tournament 
-branch predictor doesn't perform better than G-Share branch predictor. And the overall performance of Tournament branch predictor is better than G-Share branch predictor. 
+branch predictor doesn't perform better than G-Share branch predictor. But the overall performance of Tournament branch predictor is better than G-Share branch predictor. 
 
-For custom Perceptron branch predictor, the secret comes from neural network structure. Neural network can simulate both linear and non-linear functions. It has a strong learning capability. Given suffcient dataset, the neural network can do training and store the learning results in weights.
+For custom Perceptron branch predictor, the secret comes from neural network structure. Neural network can simulate both linear and non-linear functions. It has a strong learning capability. Given a suffcient large dataset, the neural network can do training and store the learning results in weights.
 The weights are helpful for neural network to do predictions. Therefore, with the same dataset, neural network can learn faster than 2-bit branch prediction. And this is the reason why custom Perceptron branch predictor performs the best. 
-Additionally, custom Perceptron branch predictor does not need to store all local history and the past prediction results. Rather, it only needs to store weights and global history in memory. Therefore, it uses
-less memory space than G-Share branch predictor and Tournament branch predictor. 
+But storing weights consumes a lot of memory space. Custom Perceptron branch predictor consumes the most memory space among three branch predictors. 
 %%%%%%% -- PAPER CONTENT ENDS -- %%%%%%%%
 
 
